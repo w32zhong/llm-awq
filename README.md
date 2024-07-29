@@ -90,9 +90,12 @@ cd llm-awq
 
 2. Install Package
 ```
-conda create -n awq python=3.10 -y
+conda create -n awq python=3.9 -y
 conda activate awq
 pip install --upgrade pip  # enable PEP 660 support
+conda install conda-forge::gcc_linux-64=11
+conda install conda-forge::gxx_linux-64=11
+conda install cuda -c nvidia/label/cuda-12.1
 pip install -e .
 ```
 

@@ -88,10 +88,6 @@ print("Quantization config:", q_config)
 
 
 def build_model_and_enc(model_path):
-    if not os.path.exists(model_path):  # look into ssd
-        raise FileNotFoundError(f"{model_path} not found!")
-    print(f"* Building model {model_path}")
-
     # all hf model
     if vila_10_quant_mode:
         from llava.model.builder import load_pretrained_model
@@ -102,7 +98,7 @@ def build_model_and_enc(model_path):
             model_base=None,
             model_name=get_model_name_from_path(model_path),
             device="cpu",
-            **{"use_cache": False}
+            #**{"use_cache": False}
         )
     else:
         config = AutoConfig.from_pretrained(model_path, trust_remote_code=True)

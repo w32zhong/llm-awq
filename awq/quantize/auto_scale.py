@@ -455,12 +455,19 @@ def apply_scale(module, scales_list, input_feat_dict=None):
             layer.cuda()
         scales.cuda()
 
+        # print(prev_op_name, layer_names)
+        #
+        # layers.j.input_layernorm -> (q_proj, k_proj, v_proj)
+        # layers.j.post_attention_layernorm -> (gate_proj, up_proj)
+        # layers.j.mlp.up_proj -> (down_proj)
+
         if isinstance(prev_op, nn.Linear):
             assert len(layers) == 1
             scale_fc_fc(prev_op, layers[0], scales)
         elif isinstance(prev_op, (nn.LayerNorm, LlamaRMSNorm)):
             scale_ln_fcs(prev_op, layers, scales)
         elif isinstance(prev_op, (nn.GELU, BloomGelu, GELUActivation)):
+            # assert False
             new_module = ScaledActivation(prev_op, scales)
             set_op_by_name(module, prev_op_name, new_module)
             scale_gelu_fc(prev_op, layers[0], scales)

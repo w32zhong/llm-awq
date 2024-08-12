@@ -64,7 +64,7 @@ def pseudo_quantize_tensor(
     org_w_shape = w.shape
     if q_group_size > 0:
         assert org_w_shape[-1] % q_group_size == 0
-        w = w.reshape(-1, q_group_size)
+        w = w.reshape(-1, q_group_size) # torch.Size([131072, 128])
     assert w.dim() == 2
     if zero_point:
         max_val = w.amax(dim=1, keepdim=True)
@@ -98,6 +98,9 @@ def pseudo_quantize_tensor(
     w = w.reshape(org_w_shape)
 
     if get_scale_zp:
+        # w: torch.Size([4096, 4096])
+        # scales: torch.Size([131072, 1]) --> torch.Size([4096, 32])
+        # zeros: torch.Size([131072, 1]) --> torch.Size([4096, 32])
         return w, scales.view(w.shape[0], -1), zeros.view(w.shape[0], -1)
     else:
         return w
@@ -129,6 +132,10 @@ def real_quantize_model_weight(model, w_bit, q_config, init_only=False):
 
     assert q_config["zero_point"], "We only support zero_point quantization now."
 
+    # w_bit=4
+    # q_config={'zero_point': True, 'q_group_size': 128}
+    # init_only=False
+
     layers = get_blocks(model)
     for i in tqdm(
         range(len(layers)),
@@ -136,7 +143,7 @@ def real_quantize_model_weight(model, w_bit, q_config, init_only=False):
     ):
         layer = layers[i]
         named_linears = get_named_linears(layer)
-        scale_activations(layer)
+        scale_activations(layer) # skipped
 
         for name, module in named_linears.items():
             if init_only:

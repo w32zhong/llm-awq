@@ -160,7 +160,7 @@ def build_model_and_enc(model_path):
 
         model.eval()
 
-        if args.run_awq:
+        if args.run_awq: # False
             assert args.dump_awq, "Please save the awq results with --dump_awq"
 
             awq_results = run_awq(
@@ -180,7 +180,7 @@ def build_model_and_enc(model_path):
 
             exit(0)
 
-        if args.load_awq:
+        if args.load_awq: # to rescale and clip
             print("Loading pre-computed AWQ results from", args.load_awq)
             awq_results = torch.load(args.load_awq, map_location="cpu")
             apply_awq(model, awq_results)

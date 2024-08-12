@@ -302,6 +302,16 @@ def main():
             with open(args.output_path, "w") as f:
                 json.dump(results, f, indent=2)
 
+    else:
+        from transformers import TextStreamer
+        while True:
+            streamer = TextStreamer(enc)
+            prompt = "here is an essay on solar eclipse: "
+            prompt = input("Enter prompt: ")
+            inputs = enc([prompt], return_tensors="pt")
+            inputs.to('cuda')
+            model.generate(**inputs, streamer=streamer, max_new_tokens=300)
+
 
 if __name__ == "__main__":
     main()

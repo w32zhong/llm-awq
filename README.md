@@ -97,6 +97,7 @@ conda install conda-forge::gcc_linux-64=11
 conda install conda-forge::gxx_linux-64=11
 conda install cuda -c nvidia/label/cuda-12.1
 pip install -e .
+# /home/tk/anaconda3/envs/awq/lib/python3.9/site-packages/awq_inference_engine-0.0.0-py3.9-linux-x86_64.egg/{awq_inference_engine.cpython-39-x86_64-linux-gnu.so, awq_inference_engine.py}
 ```
 
 * For **edge devices** like Orin, before running the commands above, please:
@@ -187,10 +188,7 @@ python -m awq.entry --model_path /PATH/TO/LLAMA3/llama3-8b \
 
 4. Load and evaluate the real quantized model (now you can see smaller gpu memory usage)
 ```bash
-python -m awq.entry --model_path /PATH/TO/LLAMA3/llama3-8b \
-    --tasks wikitext \
-    --w_bit 4 --q_group_size 128 \
-    --load_quant quant_cache/llama3-8b-w4-g128-awq.pt
+python -m awq.entry --model_path NousResearch/Meta-Llama-3-8B --w_bit 4 --q_group_size 128 --load_awq  ./data/llama3-8b-w4-g128.pt --q_backend real
 ```
 
 ## Results on Vision-Language Models (VILA-1.5)

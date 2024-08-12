@@ -54,15 +54,19 @@ def scale_ln_fcs(ln, fcs, scales):
 def scale_fc_fc(fc1, fc2, scales):
     assert isinstance(fc1, nn.Linear)
     assert isinstance(fc2, nn.Linear)
-    # assert fc1.out_features == fc2.in_features
+
+    # fc1: Linear(in_features=4096, out_features=14336)
+    # fc2: Linear(in_features=14336, out_features=4096)
+    # scales: torch.Size([14336])
 
     scales = scales.to(fc1.weight.device)
 
-    # fc1.weight.div_(scales.view(-1, 1))
+    # fc1 channels divides
     fc1.weight[-scales.size(0) :].div_(scales.view(-1, 1))
     if fc1.bias is not None:
         fc1.bias.div_(scales.view(-1))
 
+    # fc2 channels multiplies
     fc2.weight.mul_(scales.view(1, -1))
 
     for p in fc1.parameters():

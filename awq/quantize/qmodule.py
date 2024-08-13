@@ -49,6 +49,8 @@ def pack_intweight(unpacked_qweight, interleave, kstride):
         N // interleave, K // kstride, kstride, interleave
     )
     # Packing -> (N // 4, K // 64, 64)
+    # Packed_Kernel.dtype: int32 --> int16
+    # Packed_Kernel.shape: (1024, 64, 64, 4)
     Packed_Kernel = (
         Packed_Kernel[..., 0]
         | (Packed_Kernel[..., 1] << 4)
@@ -178,7 +180,7 @@ class WQLinear(nn.Module):
                     / qscales[:, idx // group_size]
                 ).to(torch.int)[:, None]
             )
-        intweight = torch.cat(intweight, dim=1)
+        intweight = torch.cat(intweight, dim=1) # torch.Size([4096, 4096])
         intweight = intweight.to(dtype=torch.int32)
         awq_linear.qweight = pack_intweight(
             intweight.contiguous(), interleave=4, kstride=64

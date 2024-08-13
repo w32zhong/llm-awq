@@ -28,35 +28,39 @@ def pack_intweight(unpacked_qweight, interleave, kstride):
     N = unpacked_qweight.shape[0]
     K = unpacked_qweight.shape[1]
 
+    # step1 = np.arange(32).reshape(4, 4, 2).transpose(1, 0, 2).reshape(32)
     Packed_Kernel = unpacked_qweight.cpu().numpy().reshape(N, K // 32, 32)
-    # np.arange(32).reshape(4, 4, 2).transpose(1, 0, 2) => [0, 1, 8, 9, 16, 17, 24, 25, ...]
     Packed_Kernel = Packed_Kernel.reshape(N, K // 32, 4, 4, 2).transpose(0, 1, 3, 2, 4)
     Packed_Kernel = Packed_Kernel.reshape(N, K // 32, 32)
+    # step1 [ 0,  1,  8,  9, 16, 17, 24, 25,  2,  3, 10, 11, 18, 19, 26, 27,  4,
+    #         5, 12, 13, 20, 21, 28, 29,  6,  7, 14, 15, 22, 23, 30, 31]
 
-    # reorder each 8 weights for fast dequantization
-    # [0, 1, 2, 3, 4, 5, 6, 7] => [0, 2, 4, 6, 1, 3, 5, 7]
+    # step2 = step1.reshape(4, 4, 2).transpose(0, 2, 1).reshape(32)
     Packed_Kernel = Packed_Kernel.reshape(N, K // 32, 4, 8)
     Packed_Kernel = Packed_Kernel.reshape(N, K // 32, 4, 4, 2).transpose(0, 1, 2, 4, 3)
     Packed_Kernel = Packed_Kernel.reshape(N, K)
+    # step2 [ 0,  8, 16, 24,  1,  9, 17, 25,  2, 10, 18, 26,  3, 11, 19, 27,  4,
+    #        12, 20, 28,  5, 13, 21, 29,  6, 14, 22, 30,  7, 15, 23, 31])
 
-    # interleaving every four rows
+    # interleave = 4, kstride = 64
     Packed_Kernel = Packed_Kernel.reshape(
         N // interleave, interleave, K // kstride, kstride
     )
-    # N // 4, K // 64, 4, 64
     Packed_Kernel = Packed_Kernel.transpose(0, 2, 1, 3)
     Packed_Kernel = Packed_Kernel.reshape(
         N // interleave, K // kstride, kstride, interleave
     )
-    # Packing -> (N // 4, K // 64, 64)
-    # Packed_Kernel.dtype: int32 --> int16
+
     # Packed_Kernel.shape: (1024, 64, 64, 4)
+    # Packed_Kernel.dtype: int32 --> int16
     Packed_Kernel = (
         Packed_Kernel[..., 0]
         | (Packed_Kernel[..., 1] << 4)
         | (Packed_Kernel[..., 2] << 8)
         | (Packed_Kernel[..., 3] << 12)
     )
+    # Packed_Kernel.shape: (1024, 64, 64)
+
     # reshape to (N // 4, K), FP16 format
     Packed_Kernel = Packed_Kernel.reshape(N // interleave, K)
     qweight = (

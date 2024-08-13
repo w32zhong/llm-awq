@@ -69,5 +69,5 @@ python -m awq.entry --model_path NousResearch/Meta-Llama-3-8B --w_bit 4 --q_grou
 ```
 
 ## Code
-[`pseudo_quantize_tensor`](awq/quantize/quantizer.py)
-[`WQLinear`](awq/quantize/qmodule.py)
+* [`pseudo_quantize_tensor`](https://github.com/w32zhong/llm-awq/blob/a5d2d1be5ca6cb4dc542efaaf1005582dc31a047/awq/quantize/quantizer.py#L61)
+* [`WQLinear`](https://github.com/w32zhong/llm-awq/blob/a5d2d1be5ca6cb4dc542efaaf1005582dc31a047/awq/quantize/qmodule.py#L78)

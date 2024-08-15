@@ -209,7 +209,6 @@ class WQLinear(nn.Module):
         # inputs = x.reshape(-1, x.shape[-1])
         inputs = x
         if inputs.numel() / inputs.shape[-1] < 8:
-            #breakpoint()
             out = awq_inference_engine.gemv_forward_cuda_new(
                 inputs, # [1, 1, 768] fp16
                 self.qweight, # [192, 768] int16
@@ -219,7 +218,8 @@ class WQLinear(nn.Module):
                 self.out_features, # 768
                 self.in_features, # 768
                 self.group_size, # 128
-            )
+            ) # out.shape: [1, 1, 768] fp16
+            #breakpoint()
         else:
             out = awq_inference_engine.gemm_forward_cuda_new(
                 inputs, self.qweight, self.scales, self.scaled_zeros

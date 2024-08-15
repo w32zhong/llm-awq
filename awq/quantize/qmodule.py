@@ -172,7 +172,6 @@ class WQLinear(nn.Module):
         )
         qscales[:, : scales.shape[1]] = scales
         awq_linear.scales = qscales.transpose(1, 0).contiguous()
-        # awq_linear.scales torch.Size([32, 4096])
         if linear.bias is not None:
             awq_linear.bias = linear.bias.clone().half()
 
@@ -189,7 +188,6 @@ class WQLinear(nn.Module):
         awq_linear.qweight = pack_intweight(
             intweight.contiguous(), interleave=4, kstride=64
         )
-        # awq_linear.qweight torch.Size([1024, 4096])
 
         zeros = zeros.to(dtype=torch.int32)
         scaled_zeros = torch.zeros_like(qscales)
@@ -197,7 +195,11 @@ class WQLinear(nn.Module):
             qscales[:, : scales.shape[1]] * (zeros.to(torch.float32))
         ).to(torch.float16)
         awq_linear.scaled_zeros = scaled_zeros.transpose(1, 0).contiguous()
-        # awq_linear.scaled_zeros torch.Size([32, 4096])
+
+        #breakpoint()
+        # awq_linear.scales torch.Size([8, 768]) fp16
+        # awq_linear.qweight torch.Size([192, 768]) int16
+        # awq_linear.scaled_zeros torch.Size([8, 768]) fp16
 
         return awq_linear
 

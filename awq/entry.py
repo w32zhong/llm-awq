@@ -310,7 +310,7 @@ def main():
             prompt = input("Enter prompt: ")
             inputs = enc([prompt], return_tensors="pt")
             inputs.to('cuda')
-            model.generate(**inputs, streamer=streamer, max_new_tokens=300)
+            model.generate(**inputs, streamer=streamer, max_new_tokens=300, use_cache=True)
 
 
 if __name__ == "__main__":
